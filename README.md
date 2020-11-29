@@ -1,3 +1,28 @@
+# Packages to install
+Install Node.js.
+Inside your API folder:
+  Make sure you have a virtual environment. 
+  Install Flask. 
+  Install python dotenv. 
+  Activate virtual environment using the command venv\Scripts\activate (Windows) or source/venv/bin/activate (MacOS, Unix-based)
+Check that your frontend-backend connection is configured correctly: 
+  In the package.json file in the taskbox directory, make sure that there is a line that says: 
+  "proxy": "http://localhost:5000"
+  5000 is the port that runs the API backend, so we are sending requests from the React app to the API by calling our API backend the       proxy. 
+# Running the application
+Open two terminals. 
+In the first terminal: 
+  Navigate to the taskbox directory.
+  Use the command npm start to run the React app on port 3000. 
+In the second terminal: 
+  Navigate to the taskbox directory. 
+  Execute the following command for Windows: cd api && venv\Scripts\flask run --no-debugger
+  Execute the following command or MacOS/Unix-based OS: cd api && source venv/bin/flask run --no-debugger
+  This will run the API backend on port 5000. 
+
+
+See below for more details on the React project. 
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
