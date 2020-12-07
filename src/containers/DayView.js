@@ -13,7 +13,6 @@ const DayView = () => {
             fetch('/authentication')
                 .then(response => response.json())
                 .then(data => setAuth(data.isAuthenticated));
-                console.log(auth);
         }
         return function cleanup() {
             mounted = false;

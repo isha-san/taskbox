@@ -6,6 +6,11 @@ import Colorprompt from './ColorPrompt.js'
 import './App.css';
 import { post } from 'jquery';
 
+function increment(num) {
+  if (num < 10) {
+    return num.toString() + '0';
+  }
+}
 class Grid extends React.Component {
     constructor(props){
       super(props);
@@ -25,41 +30,74 @@ class Grid extends React.Component {
         dayDuration: [12, 46],
         colorTagsList: props.initColors
       };
+    } 
+    //how to get the grid to update without user actions? / when the grid displays for the first time? 
+    componentDidMount() {
+      this.updateGrid(); 
     }
-    
-    updateGrid() {
-      fetch('/tasks')
-      .then(response => {
-        let i;
-        var v = response.json();
-        console.log(v)
-        for (i = 0; i < 48; i++) {
-          if (v.title) {
-            v.array.forEach(element => {
-              if (element.time === i) {
-                console.log(element);
-                this.state.taskList[i] = {checked: element.checked, color: 1, text: element.title};
-              }
-            });
+
+    updateGrid() {      
+      fetch('/tasks', {method: "GET"})
+      .then(response =>response.json())
+      .then(v => {
+        if (v.title === null) {
+          return; 
+        }
+        for (let i = 0; i < 48; i++) {
+          for (const key in v){
+            console.log(`key: ${key}`);
+            const value = v[key];
+            //console.log(value);
+            if (key != '-1' && value.time === i) {
+              console.log("value reached");
+              this.state.taskList[i] = {'checked': value.checked, 'color': value.color, 'text': value.title};
+            }
           }
         }
+        console.log(this.state.taskList);
       });
     }
+    
     onTextChange(event, time) {
-      //Adding a task
-      let taskList = this.state.taskList; 
+      const today = new Date(); 
+      //YYYY-MM-DD
+      const month = increment(today.getMonth() + 1); 
+      const date = increment(today.getDate() + 1); 
+      const year = today.getFullYear().toString(); 
+      const myDate = `${year}-${month}-${date}`
+      //Adding text for a new task
+      let taskList = this.state.taskList;
+      let t = taskList[time];
       if (taskList[time].text == '') {
-        taskList[time].text = event;
-        let t = taskList[time];
+        t.text = event; 
         const requestOptions = {
           method: 'POST', 
-          body: JSON.stringify({'text': t.text, 'color': t.color, 'time': time, 'checked': t.checked})
+          body: JSON.stringify({'text': t.text, 'color': 1, 'time': time, 'checked': false})
         };
         fetch('/tasks', requestOptions); 
       }
-      taskList[time].text = event;
-      this.updateGrid(); 
+      //Editing an existing task's text
+      else if (taskList[time].text != '' && event != "") {
+        t.text = event; 
+        const requestOptions = {
+          method: 'POST', 
+          body: JSON.stringify({'text': t.text, 'color': t.color, 'time': time, 'date': myDate,'checked': t.checked})
+        };
+        fetch('/updateTask', requestOptions); 
+      }
+      //Deleting an existing task's text
+      else {
+        if (event == "") {
+          t.text = event; 
+          const requestOptions = {
+            method: 'POST', 
+            body: JSON.stringify({'time': time, 'date': myDate})
+          };
+          fetch('/deleteTask', requestOptions);
+        }
+      }
       this.setState({taskList:taskList});
+      this.updateGrid(); 
     }
     
     onSubTextChange(event, time, subIndex) {
@@ -197,7 +235,8 @@ class Grid extends React.Component {
           this.setState({dayDuration: dayDuration});
         }
     }
-    render(){        
+    render(){   
+      this.updateGrid();      
        const taskList = this.state.taskList.map((task, index) => 
         <>
           {(index) % 2 == 0 && <div className="grid--label" style={{display: ((index) >= this.state.dayDuration[0] && (index) < this.state.dayDuration[1]) ? "block" : "none"}}><span>{parseInt(index)/2 % 12 == 0 ? 12 : parseInt(index)/2 % 12}{((index) <= 22) ? "am" : "pm"}</span></div>}

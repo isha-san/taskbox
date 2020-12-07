@@ -1,4 +1,5 @@
 import sqlite3
+import types
 from datetime import date
 from flask import Flask, request, session
 import json
@@ -87,7 +88,6 @@ def signup():
             print("login successful")
             return {'isAuthenticated' : True, "caption" : "Login successful"}
     # Return that the user has not been authenticated
-    # Form gets rendered with React'''
     elif request.method == "GET":
         return {'isAuthenticated' : False}
     
@@ -101,52 +101,68 @@ def logout():
 @app.route('/tasks', methods = ["GET", "POST"])
 def tasks():
     if (request.method == "GET"):
-        db = sqlite3.connect("timebox.db")
-        # Work on this tomorrow!
-        rows = db.execute("SELECT * FROM tasks WHERE user_id = ? AND date = ? ", [session["user_id"], date.today()])
-        rows = rows.fetchall()
-        if (len(rows) == 0):
-            print("correct branch reached, no rows here")
-            return {"title": None}
-        print(rows)
-        return rows
+        with sqlite3.connect("timebox.db") as db:
+            rows = db.execute("SELECT * FROM tasks WHERE user_id = ? AND date = ?;", [session["user_id"], date.today()])
+            rows = rows.fetchall()
+            if (len(rows) == 0):
+                print("no rows here")
+                return {"title": None}
+            
+            d = {'-1':{'hi': 'bye'}}
+            for i in range(len(rows)):
+                d[str(i)] = {"title": "", "color": 1, "time": 0, "checked": False}
+                d[str(i)]['title'] = rows[i][2]
+                d[str(i)]['color'] = rows[i][3]
+                d[str(i)]['time'] = rows[i][5]
+                d[str(i)]['checked'] = rows[i][6]
+            
+            return d
     elif (request.method == "POST"):
         try: 
             d = str(request.data)
-            print(d)
+            
             data = json.loads(d[2 : len(d) - 1])
         except RuntimeError:
-            # can i return nothing?
             return {"caption" : "Internal error"}
-        db = sqlite3.connect("timebox.db")
-        db.execute("INSERT INTO tasks (user_id, title, color, date, time, checked) VALUES (?, ?, ?, ?, ?, ?)", [session['user_id'], data['text'], data['color'], date.today(), data['time'], data['checked']])
-        print("task stored successfully")
-        return {"caption": "task stored successfully"}
+        with sqlite3.connect("timebox.db") as db:
+            
+            db.execute("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, title TEXT, color TEXT, date DATE NOT NULL, time INTEGER NOT NULL, checked BOOLEAN);")
+            db.execute("INSERT INTO tasks (user_id, title, color, date, time, checked) VALUES (?, ?, ?, ?, ?, ?);", [session['user_id'], data['text'], data['color'], date.today(), data['time'], data['checked']])
+            rows = db.execute("SELECT * from tasks WHERE user_id = ? AND date = ? AND time = ?;", [session["user_id"], date.today(), data["time"]])
+            rows = rows.fetchall()
+            if len(rows) == 0:
+                print("TASK NOT STORED")
+            else: 
+                
+                print("TASK STORED SUCCESSFULLY")
+            return {"caption": "task stored successfully"}
 
 @app.route('/deleteTask', methods = ["POST"])
-def delete_task():
+def deleteTask():
     if (request.method == "POST"):
-        db = sqlite3.connect("timebox.db")
-        try: 
-            d = str(request.data)
-            print(d)
-            data = json.loads(d[2 : len(d) - 1])
-        except RuntimeError:
-            # can i return nothing?
-            return {"caption" : "Internal error"}
-        db.execute("DELETE * FROM tasks WHERE user_id = ? AND date = ? AND time = ?", [session["user_id"], data['date'], data['time']])
-        # return nothing? 
+        with sqlite3.connect("timebox.db") as db:
+            try: 
+                d = str(request.data)
+                
+                data = json.loads(d[2 : len(d) - 1])
+            except RuntimeError:
+                return {"caption" : "Internal error"}
+            db.execute("DELETE FROM tasks WHERE user_id = ? AND date = ? AND time = ?", [session["user_id"], data['date'], data['time']])
+            rows = db.execute("SELECT * from tasks WHERE user_id = ? AND date = ? AND time = ?;", [session["user_id"], data['date'], data["time"]])
+            rows = rows.fetchall()
+            if (len(rows) == 0):
+                print("task deleted")
+            return {"caption": "task deleted successfully"}
 
 @app.route('/updateTask', methods = ["POST"])
-def edit_task():
+def updateTask():
     if (request.method == "POST"):
-        db = sqlite3.connect("timebox.db")
-        try: 
-            d = str(request.data)
-            print(d)
-            data = json.loads(d[2 : len(d) - 1])
-        except RuntimeError:
-            # can i return nothing?
-            return {"caption" : "Internal error"}
-        db.execute("UPDATE (SELECT * FROM tasks WHERE user_id = ? AND date = ? AND time = ?) SET time = ? AND color = ? AND title = ? AND checked = ?", [session["user_id"], data['time'], data['color'], data['text'], data['checked']])
-        # return nothing? 
+        with sqlite3.connect("timebox.db") as db:
+            try: 
+                d = str(request.data)
+               
+                data = json.loads(d[2 : len(d) - 1])
+            except RuntimeError:
+                return {"caption" : "Internal error"}
+            db.execute("UPDATE tasks SET color = ?, title = ?, checked = ? WHERE user_id = ? AND date = ? AND time = ? ", [data['color'], data['text'], data['checked'], session["user_id"], date.today(), data['time']])
+            return {"caption": "task updated successfully"}
