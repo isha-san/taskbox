@@ -5,12 +5,12 @@ import { NavLink } from 'react-router-dom';
 function NavBar() {
     const [auth, setAuth] = useState(false);
     useEffect(() => {
-        window.onload = function() {
+        window.addEventListener(('DOMContentLoaded'), function() {
             let btn = document.getElementById("logout-btn"); 
             btn.addEventListener('click', function() {
                 fetch("/logout");
             }); 
-        };
+        });
         fetch('/authentication')
         .then(response => response.json())
         .then(data => setAuth(data.isAuthenticated));
@@ -28,6 +28,7 @@ function NavBar() {
     <Fragment>
         <NavLink exact to="/profile">Profile</NavLink>
         <NavLink exact to="/authhome">Home</NavLink>
+        <NavLink exact to="/dayview">Schedule</NavLink>
         <button id="logout-btn" onClick={logout}>Log Out</button>
     </Fragment>
 

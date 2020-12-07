@@ -7,6 +7,7 @@ import Profile from './containers/Profile.js';
 import NavBar from '.\\components\\NavBar.js';
 import Landing from './containers/Landing.js';
 import checkAuth from './actions/CheckAuth.js';
+import DayView from './containers/DayView.js';
 
 function App() {
   if (checkAuth()) {
@@ -24,6 +25,7 @@ function App() {
           <Route exact path='/landing' component={Landing}/>
           <Route exact path='/login' component={Login}/>
           <Route exact path='/signup' component={Signup}/>
+          <Route exact path="/dayview" component={DayView}/>
           <Route exact path='/authhome' component={AuthHome}/>
           <Route exact path='/profile' component={Profile}/>
         </BrowserRouter>

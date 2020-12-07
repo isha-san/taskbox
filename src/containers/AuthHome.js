@@ -22,7 +22,7 @@ function AuthHome() {
     return (
         <div>
             <NavBar></NavBar>
-            <h1>Nothing to see here!</h1>
+            <h1>Authenticated Home</h1>
         </div>
     );
 }

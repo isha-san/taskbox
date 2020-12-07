@@ -9,7 +9,7 @@ function Landing() {
     return (
         <div>
             <NavBar></NavBar>
-            <h1>Nothing to see here!</h1>
+            <h1>Landing</h1>
         </div>
     );
 }
