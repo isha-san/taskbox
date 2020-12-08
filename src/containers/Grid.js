@@ -142,6 +142,8 @@ class Grid extends React.Component {
       //TODO: take care of end stuff
       taskList.splice(48, 1);
       this.setState({taskList:taskList});
+      fetch("/shiftTasks");
+      this.updateGrid(); 
     }
     
     onFocusChangeState = (ind) => {
@@ -194,7 +196,14 @@ class Grid extends React.Component {
     changeColor(focusIndex)
     {
       let taskList = this.state.taskList;
+      /*let t = taskList[time];
       taskList[this.state.focusNum[1]].color = focusIndex;
+      const requestOptions = {
+        method: 'POST', 
+        body: JSON.stringify({'text': t.text, 'color': t.color, 'time': time, 'date': myDate,'checked': t.checked})
+      };
+      fetch("/updateTask")
+        .then*/
       this.setState({taskList:taskList});
     }
     
@@ -247,7 +256,12 @@ class Grid extends React.Component {
         
        return(
          <div className="app">
-          
+              <p>Write the tasks you intend to complete in the grid's half-hour chunks.
+                <br/>
+                If you want to shift a task over, you can press the right arrow on the left panel. 
+                <br/>
+                If you want to carry over a task, HOW ARE USERS SUPPOSED TO CARRY OVER TASKS PLEASE FINISH THIS
+              </p>
              <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} />
           
              <div className="sidebar" id="sidebar">

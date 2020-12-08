@@ -147,8 +147,8 @@ def deleteTask():
                 data = json.loads(d[2 : len(d) - 1])
             except RuntimeError:
                 return {"caption" : "Internal error"}
-            db.execute("DELETE FROM tasks WHERE user_id = ? AND date = ? AND time = ?", [session["user_id"], data['date'], data['time']])
-            rows = db.execute("SELECT * from tasks WHERE user_id = ? AND date = ? AND time = ?;", [session["user_id"], data['date'], data["time"]])
+            db.execute("DELETE FROM tasks WHERE user_id = ? AND date = ? AND time = ?", [session["user_id"], date.today(), data['time']])
+            rows = db.execute("SELECT * from tasks WHERE user_id = ? AND date = ? AND time = ?;", [session["user_id"], date.today(), data["time"]])
             rows = rows.fetchall()
             if (len(rows) == 0):
                 print("task deleted")
@@ -166,3 +166,10 @@ def updateTask():
                 return {"caption" : "Internal error"}
             db.execute("UPDATE tasks SET color = ?, title = ?, checked = ? WHERE user_id = ? AND date = ? AND time = ? ", [data['color'], data['text'], data['checked'], session["user_id"], date.today(), data['time']])
             return {"caption": "task updated successfully"}
+
+@app.route('/shiftTasks')
+def shiftTasks():
+    with sqlite3.connect("timebox.db") as db:
+        db.execute("UPDATE tasks SET time = time + 1 WHERE user_id = ? AND date = ?", [session['user_id'], date.today()])
+        print("tasks shifted successfully")
+        return {"caption": "tasks shifted successfully"}

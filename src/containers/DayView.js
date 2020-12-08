@@ -42,7 +42,8 @@ const DayView = () => {
         return <Redirect exact to="/login"/>;
     }
     return (
-      <div class="app">
+      <div class="dayview-container">
+        <NavBar></NavBar>
         <Grid initList={data} initColors = {tagColors}/>
       </div>
     );
