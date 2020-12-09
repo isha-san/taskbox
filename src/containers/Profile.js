@@ -1,5 +1,4 @@
 import NavBar from '../components/NavBar.js';
-import checkAuth from '../actions/CheckAuth.js';
 import { Redirect } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 

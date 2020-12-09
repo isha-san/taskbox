@@ -8,9 +8,31 @@ class Chunk extends React.Component {
       this.onTextChangeHelper = this.onTextChangeHelper.bind(this);
       this.onSubTextChangeHelper = this.onSubTextChangeHelper.bind(this);
       this.onSubDeleteHelper = this.onSubDeleteHelper.bind(this);
+      this.isEventPresent = this.isEventPresent.bind(this);
       this.onSubCheckOffHelper.bind(this);
+
+      this.state = {
+        calendarEvents: this.props.calendarEvents, 
+        isEventPresent: false
+      };
+      
     };
-    
+    componentDidMount() {
+      this.setState({
+        isEventPresent: this.isEventPresent()
+      });
+    }
+    isEventPresent = () => {
+      var GCal = this.props.GCal;
+      var index = this.props.time;
+      for (var i = 0; i < GCal.length; i++){
+        if (GCal[i][0] <= index && index < GCal[i][1]){
+          return true;
+        }
+      }
+      return false;
+    }
+
     onTextChangeHelper(e) {
       this.props.onTextChange(e.target.value, this.props.time);
     }
@@ -97,7 +119,7 @@ class Chunk extends React.Component {
 
         <div style={{display: ((this.props.time) >= this.props.dayDuration[0] && (this.props.time) < this.props.dayDuration[1]) ? "block" : "none"}}>
           <span className="task--wrapper">
-            <input className={"task--title " + (this.props.checked ? "locked-title" : "highlight shown-title")} type="text" value={this.props.text} onChange={this.onTextChangeHelper} /*onClick={() => this.showSubtasks(this.props.time, this.props.subtasks.length)}*/ disabled={this.props.checked} style={{backgroundColor: isFocusOn ? "var(--light-color)" : "white"}}/>
+          <input className={"task--title " + (this.props.checked ? "locked-title" : "highlight shown-title")} type="text" value={this.props.text} onChange={this.onTextChangeHelper} /*onClick={() => this.showSubtasks(this.props.time, this.props.subtasks.length)}*/ disabled={this.props.checked} style={{backgroundColor: isFocusOn ? "var(--light-color)" : "white", backgroundColor: this.isEventPresent() ? "gray" : ""}}/>
             <div className={this.props.checked ? "mid-lock" : "color-line"} style={{backgroundColor: this.props.colorTagsList[this.props.color].hexcode}}></div>
             <div className = {"circlebox " + (this.props.checked ? "task--lockbox" : "task--checkbox")} onClick = {() => this.props.checkTask(this.props.time)} style = {{backgroundColor:this.props.checked ? this.props.colorTagsList[this.props.color].hexcode : "white", visibility: isFocusOn ? "visible" : "hidden"}}></div>
           </span>

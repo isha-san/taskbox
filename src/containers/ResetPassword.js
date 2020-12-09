@@ -15,7 +15,7 @@ function ResetPassword() {
 			body: {'email' : email}
 		}
 		fetch('/resetPassword')
-			.then(response => response.json())
+			.then(response => response.json());
 	}
 return (
 	<div>

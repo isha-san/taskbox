@@ -6,19 +6,47 @@ import Colorprompt from './ColorPrompt.js'
 import './App.css';
 import { post } from 'jquery';
 
-// Array of API discovery doc URLs for APIs used by the quickstart
-var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-// Authorization scopes required by the API; multiple scopes can be
-// included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+var gapi = window.gapi; 
 var CLIENT_ID = '10850774893-34a5778a4t7is6pkmqm6n6dpvuv9g77u.apps.googleusercontent.com';
-var API_KEY = 'AIzaSyBKe62PdVD_AFoFugnc4cX7umBvygSWk8w';
+var API_KEY = 'AIzaSyA6XBTP57rgtoCB3VRgipfXYIAiwxakZcc'; 
+var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+var today = new Date(); 
+      //YYYY-MM-DD
+      var month = increment(today.getMonth() + 1); 
+      var date = increment(today.getDate() + 1); 
+      var year = today.getFullYear().toString(); 
+      var myDate = `${year}-${month}-${date}`
 function increment(num) {
   if (num < 10) {
     return num.toString() + '0';
   }
 }
+function roundCalendarTime(d, s) {
+  const minutes = d.getMinutes(); 
+  const hours = d.getHours();  
+  if (0 < minutes && minutes < 30) {
+    if (s == 'start') {
+      d.setMinutes(0);
+    }
+    else { (d.setMinutes(30)) }
+  }
+  else if (30 < minutes && minutes <= 59) {
+    if (s == 'start') {
+      d.setMinutes(30);
+    }
+    else { d.setMinutes(0); d.setHours(hours + 1); }
+  }
+  return d; 
+}
+function generateTimeSlot(d) {
+  if (d.getMinutes() == 30) {
+    return (2*d.getHours()) + 1; 
+  }
+  else return 2*d.getHours(); 
+}
 class Grid extends React.Component {
+  
     constructor(props){
       super(props);
       
@@ -30,12 +58,14 @@ class Grid extends React.Component {
       this.shiftForward = this.shiftForward.bind(this);
       this.carryOver = this.carryOver.bind(this);
       this.changeColor = this.changeColor.bind(this);
-      
+      this.getEvents = this.getEvents.bind(this);
+      this.updateGrid = this.updateGrid.bind(this);
+  
       this.state = {
         taskList: props.initList,
-        events: [], 
+        calendarApi: false, 
+        eventTimes: [[]], 
         focusNum: [-1, -1],
-        calendarId: 'ishamsangani@gmail.com',
         dayDuration: [12, 46],
         colorTagsList: props.initColors
       };
@@ -43,53 +73,57 @@ class Grid extends React.Component {
     //how to get the grid to update without user actions? / when the grid displays for the first time? 
     componentDidMount() {
       this.updateGrid(); 
-      if (this.state.calendarId != '') {
+      //if (this.state.calendarId != '') {
         this.getEvents(); 
-      }
+      //}
     }
-    
+
     //Uses GCal API to pull calendar events into grid
     getEvents() {
-      let that = this;
-      function initClient() {
+      //set the APi as enabled in state
+      this.state.calendarApi = true; 
+      //load GAPI
+      gapi.load('client:auth2', () => {
         gapi.client.init({
           apiKey: API_KEY,
           clientId: CLIENT_ID,
           discoveryDocs: DISCOVERY_DOCS,
           scope: SCOPES
         })
-      function handleClientLoad() {
-        gapi.load('client:auth2', initClient);
-      } 
-      function start() {
-        handleClientLoad().then(function() {
-          return gapi.client.request({
-            'path': `https://www.googleapis.com/calendar/v3/calendars/${this.state.calendarId}/events`
-          })
-        }).then ((response => {
-            let events = response.results.items;
-            console.log(events);
-            //need to fix setState
-            //that.setState({events});
-            //console.log(that.state.events);
-        }))
-      }
-      gapi.load('client', start);
-    }
-  }
-    //Sets API key when user puts their calendar ID in the input box
-    setCalendarId() {
-      window.addEventListener('DOMContentLoaded', function() {
-        let box = document.getElementById('calendar-id');
-        box.addEventListener('submit', function() {
-          this.state.calendarId = box.value;
-          this.getEvents(); 
-        });
+        gapi.client.load('calendar', 'v3');
+        //Display a pop-up for the user to sign in with Google
+        gapi.auth2.getAuthInstance().signIn()
+          .then(() => {
+              // get events
+            console.log("i'm the getting the events for you, be back in a sec");
+            var minHour = new Date(); 
+            //is this part even necessary? 
+            minHour.setHours(this.state.dayDuration[0]/2);
+            var maxHour = new Date(); 
+            //is this part even necessary?
+            maxHour.setHours(this.state.dayDuration[1]/2);
+            gapi.client.calendar.events.list({
+              'calendarId': 'primary', 
+              'timeMin': minHour.toISOString(), 
+              'timeMax': maxHour.toISOString(),
+              'singleEvents': true,
+              'orderBy':'startTime'
+            }).then(response =>{
+              const events = response.result.items;
+              events.forEach(event =>{
+                let s = roundCalendarTime(new Date(event.start.dateTime), 'start');
+                let e = roundCalendarTime(new Date(event.end.dateTime), 'end');
+                this.state.eventTimes.push([generateTimeSlot(s), generateTimeSlot(e)]);
+              })
+              console.log('EVENTS: ', events);
+              console.log(this.state.eventTimes);
+            });
+          });
       });
     }
 
-    //Updates grid with tasks already in database
-    updateGrid() {      
+    //Updates grid with tasks from backend
+    updateGrid() {  
       fetch('/tasks', {method: "GET"})
       .then(response =>response.json())
       .then(v => {
@@ -98,7 +132,6 @@ class Grid extends React.Component {
         }
         for (let i = 0; i < 48; i++) {
           for (const key in v){
-            console.log(`key: ${key}`);
             const value = v[key];
             //console.log(value);
             if (key != '-1' && value.time === i) {
@@ -112,12 +145,6 @@ class Grid extends React.Component {
     }
     
     onTextChange(event, time) {
-      const today = new Date(); 
-      //YYYY-MM-DD
-      const month = increment(today.getMonth() + 1); 
-      const date = increment(today.getDate() + 1); 
-      const year = today.getFullYear().toString(); 
-      const myDate = `${year}-${month}-${date}`
       //Adding text for a new task
       let taskList = this.state.taskList;
       let t = taskList[time];
@@ -248,15 +275,18 @@ class Grid extends React.Component {
     
     changeColor(focusIndex) {
       let taskList = this.state.taskList;
-      /*let t = taskList[time];
       taskList[this.state.focusNum[1]].color = focusIndex;
-      const requestOptions = {
-        method: 'POST', 
-        body: JSON.stringify({'text': t.text, 'color': t.color, 'time': time, 'date': myDate,'checked': t.checked})
-      };
-      fetch("/updateTask")
-        .then*/
       this.setState({taskList:taskList});
+      /*if (t.text != '') {
+        t.color = focusIndex;
+        const requestOptions = {
+          method: 'POST', 
+          body: JSON.stringify({'text': t.text, 'color': focusIndex, 'time': t.time, 'date': t.date,'checked': t.checked})
+        };
+        fetch("/updateTask", requestOptions); 
+        this.setState({taskList:taskList});
+      }*/
+      
     }
     
     checkTask(timeIndex) {
@@ -295,29 +325,16 @@ class Grid extends React.Component {
     render() {   
       this.updateGrid();      
        const taskList = this.state.taskList.map((task, index) => 
-        <>
-          {(index) % 2 == 0 && <div className="grid--label" style={{display: ((index) >= this.state.dayDuration[0] && (index) < this.state.dayDuration[1]) ? "block" : "none"}}><span>{parseInt(index)/2 % 12 == 0 ? 12 : parseInt(index)/2 % 12}{((index) <= 22) ? "am" : "pm"}</span></div>}
+        <>{(index) % 2 == 0 && <div className="grid--label" style={{display: ((index) >= this.state.dayDuration[0] && (index) < this.state.dayDuration[1]) ? "block" : "none"}}><span>{parseInt(index)/2 % 12 == 0 ? 12 : parseInt(index)/2 % 12}{((index) <= 22) ? "am" : "pm"}</span></div>}
           <Chunk
-            time={index} text={task.text} checked={task.checked} color={task.color} subtasks={task.subtasks} dayDuration={this.state.dayDuration} focusNum={this.state.focusNum} colorTagsList = {this.state.colorTagsList}
+            GCal={this.state.eventTimes} time={index} text={task.text} checked={task.checked} color={task.color} subtasks={task.subtasks} dayDuration={this.state.dayDuration} focusNum={this.state.focusNum} colorTagsList = {this.state.colorTagsList}
             onTextChange = {this.onTextChange} onSubTextChange={this.onSubTextChange} onSubDelete={this.onSubDelete} onSubCheckOff={this.onSubCheckOff} onFocusChangeState={this.onFocusChangeState} checkTask = {this.checkTask}/>
           </>);
-      
-      
+            
        return(
          <div className="app">
-           
-              <p>Write the tasks you intend to complete in the grid's half-hour chunks.
-                If you want to shift a task over, you can press the right arrow on the left panel. 
-              </p>
-              <p>Want to see your Google Calendar events here as well? Follow these steps:
-                1. Open your Google Calendar app.  
-                2. Make ONE of the calendars public. 
-                3. Find your Google Calendar ID using <a href="https://docs.simplecalendar.io/find-google-calendar-id/">this link.</a>
-                Paste it into the text box below. 
-              </p>
-              <form>
-                <input type="text" id="calendar-id" onSubmit={this.setCalendarId}/>
-              </form> 
+              <button onClick={this.getEvents}>Add events from Google Calendar</button> 
+              <p>Greyed out areas represent GCal events.</p>
              <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} />
           
              <div className="sidebar" id="sidebar">

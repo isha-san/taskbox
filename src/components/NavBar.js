@@ -7,9 +7,11 @@ function NavBar() {
     useEffect(() => {
         window.addEventListener(('DOMContentLoaded'), function() {
             let btn = document.getElementById("logout-btn"); 
-            btn.addEventListener('click', function() {
-                fetch("/logout");
-            }); 
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    fetch("/logout");
+                });
+            } 
         });
         fetch('/authentication')
         .then(response => response.json())

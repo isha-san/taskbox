@@ -1,10 +1,17 @@
 import NavBar from '../components/NavBar.js';
-import checkAuth from '../actions/CheckAuth.js';
+import { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom'; 
 
 function Landing() {
-    if (checkAuth()) {
-        return <Redirect to="/authhome"/>;
+    const [auth, setAuth] = useState(false);
+    useEffect(() => {
+        fetch('/authentication')
+        .then(response => response.json())
+        .then(data => setAuth(data.isAuthenticated));
+        console.log(auth);
+    });
+    if (auth === false) {
+        return <Redirect exact to="/login"/>
     }
     return (
         <div>
