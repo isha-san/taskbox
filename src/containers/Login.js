@@ -58,6 +58,8 @@ function Login() {
                 </input>
                 <button type="submit" onClick={handleClick}>Submit</button>
             </form>
+            <p>Forgot Your Password?<a href="{{ '/resetpassword' }}"> Click to Reset It</a>
+            </p>
         </div>
         
     );

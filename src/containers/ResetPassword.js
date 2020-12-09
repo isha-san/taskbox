@@ -1,4 +1,5 @@
 import NavBar from '../components/NavBar.js';
+import {useState} from 'react';
 
 function ResetPassword() {
 	const [email, setEmail] = useState(''); 
