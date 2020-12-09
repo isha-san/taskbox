@@ -25,6 +25,30 @@ def authentication():
     print("currently not logged in")
     return {'isAuthenticated' : False}
 
+# Route for password reset
+@app.route('/resetPassword')
+def resetPassword():
+    try: 
+        d = str(request.data)
+        print(d)
+        data = json.loads(d[2 : len(d) - 1])
+    except RuntimeError:
+        return { 'isAuthenticated' : False, "caption" : "Internal error"}
+    if not data["email"]:
+        print("incomplete form")
+        return {'isAuthenticated': False, "caption": "Must enter an email address"}
+    # checks to see if there is a user with the data
+    # creates a connection to database
+    users = db.execute("SELECT * FROM users WHERE email = ?", [data["email"]])
+    users = users.fetchall()
+    # if such a user exists, sets the session user id to the user's id in the database
+    if len(users) == 1:
+        return redirect ('/')#TODO: redirect to function to generate key and send email
+    # if a user does not exist, returns error message
+    else:
+        print("No user found with this email address")
+        return {'isAuthenticated' : False, "caption": "Incorrect email"}
+
 # Route for login
 @app.route('/login', methods = ["GET", "POST"])
 def login():

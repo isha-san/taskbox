@@ -39,7 +39,7 @@ class Colorprompt extends React.Component {
       const customizeTagsList = this.state.colorTagsList.map
     ((color, index) => 
      <>
-       <div className="tag-color" style={{backgroundColor:color.hexcode}}><div class="tag-checkbox"></div></div>
+       <div className="tag-color" style={{backgroundColor:color.hexcode}}><div className="tag-checkbox"></div></div>
        <div><input className="tag-title" value={color.title} onChange={(e) => this.tagTitleChange(e, index)} onFocus={() => this.focusChange(index)} /></div>
     </>);
     return (

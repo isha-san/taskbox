@@ -6,6 +6,13 @@ import Colorprompt from './ColorPrompt.js'
 import './App.css';
 import { post } from 'jquery';
 
+// Array of API discovery doc URLs for APIs used by the quickstart
+var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+// Authorization scopes required by the API; multiple scopes can be
+// included, separated by spaces.
+var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+var CLIENT_ID = '10850774893-34a5778a4t7is6pkmqm6n6dpvuv9g77u.apps.googleusercontent.com';
+var API_KEY = 'AIzaSyBKe62PdVD_AFoFugnc4cX7umBvygSWk8w';
 function increment(num) {
   if (num < 10) {
     return num.toString() + '0';
@@ -26,7 +33,9 @@ class Grid extends React.Component {
       
       this.state = {
         taskList: props.initList,
+        events: [], 
         focusNum: [-1, -1],
+        calendarId: 'ishamsangani@gmail.com',
         dayDuration: [12, 46],
         colorTagsList: props.initColors
       };
@@ -34,8 +43,52 @@ class Grid extends React.Component {
     //how to get the grid to update without user actions? / when the grid displays for the first time? 
     componentDidMount() {
       this.updateGrid(); 
+      if (this.state.calendarId != '') {
+        this.getEvents(); 
+      }
+    }
+    
+    //Uses GCal API to pull calendar events into grid
+    getEvents() {
+      let that = this;
+      function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        })
+      function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+      } 
+      function start() {
+        handleClientLoad().then(function() {
+          return gapi.client.request({
+            'path': `https://www.googleapis.com/calendar/v3/calendars/${this.state.calendarId}/events`
+          })
+        }).then ((response => {
+            let events = response.results.items;
+            console.log(events);
+            //need to fix setState
+            //that.setState({events});
+            //console.log(that.state.events);
+        }))
+      }
+      gapi.load('client', start);
+    }
+  }
+    //Sets API key when user puts their calendar ID in the input box
+    setCalendarId() {
+      window.addEventListener('DOMContentLoaded', function() {
+        let box = document.getElementById('calendar-id');
+        box.addEventListener('submit', function() {
+          this.state.calendarId = box.value;
+          this.getEvents(); 
+        });
+      });
     }
 
+    //Updates grid with tasks already in database
     updateGrid() {      
       fetch('/tasks', {method: "GET"})
       .then(response =>response.json())
@@ -146,7 +199,7 @@ class Grid extends React.Component {
       this.updateGrid(); 
     }
     
-    onFocusChangeState = (ind) => {
+    onFocusChangeState(ind) {
       let focusNum = this.state.focusNum;
       focusNum.shift();
       focusNum.push(ind);
@@ -155,7 +208,7 @@ class Grid extends React.Component {
     
     carryOver() {
       let taskList = this.state.taskList;
-      let toBePushed = this.state.focusInd;
+      let toBePushed = this.state.focusNum;
       
       console.log(taskList[toBePushed].text);
       
@@ -193,8 +246,7 @@ class Grid extends React.Component {
         alert("hello");
     });*/
     
-    changeColor(focusIndex)
-    {
+    changeColor(focusIndex) {
       let taskList = this.state.taskList;
       /*let t = taskList[time];
       taskList[this.state.focusNum[1]].color = focusIndex;
@@ -207,20 +259,17 @@ class Grid extends React.Component {
       this.setState({taskList:taskList});
     }
     
-    checkTask = (timeIndex) =>
-    {
+    checkTask(timeIndex) {
       let taskList = this.state.taskList;
       taskList[timeIndex].checked = !taskList[timeIndex].checked;
       this.setState({taskList:taskList});
     }
     
-    updateColorTags = (lis) =>
-    {
+    updateColorTags(lis) {
      this.setState({colorTagsList:lis});
     }
     
-    updateStartHour = (e) =>
-    {
+    updateStartHour(e) {
       let dayDuration = this.state.dayDuration;
       var text = e.target.value;
       if (1 <= text && text <= 12 || text == "")
@@ -234,8 +283,7 @@ class Grid extends React.Component {
         }
     }
     
-    updateEndHour = (e) =>
-    {
+    updateEndHour(e) {
       let dayDuration = this.state.dayDuration;
       var text = e.target.value;
       if (1 <= text && text <= 11 || text == "")
@@ -244,7 +292,7 @@ class Grid extends React.Component {
           this.setState({dayDuration: dayDuration});
         }
     }
-    render(){   
+    render() {   
       this.updateGrid();      
        const taskList = this.state.taskList.map((task, index) => 
         <>
@@ -253,28 +301,35 @@ class Grid extends React.Component {
             time={index} text={task.text} checked={task.checked} color={task.color} subtasks={task.subtasks} dayDuration={this.state.dayDuration} focusNum={this.state.focusNum} colorTagsList = {this.state.colorTagsList}
             onTextChange = {this.onTextChange} onSubTextChange={this.onSubTextChange} onSubDelete={this.onSubDelete} onSubCheckOff={this.onSubCheckOff} onFocusChangeState={this.onFocusChangeState} checkTask = {this.checkTask}/>
           </>);
-        
+      
+      
        return(
          <div className="app">
+           
               <p>Write the tasks you intend to complete in the grid's half-hour chunks.
-                <br/>
                 If you want to shift a task over, you can press the right arrow on the left panel. 
-                <br/>
-                If you want to carry over a task, HOW ARE USERS SUPPOSED TO CARRY OVER TASKS PLEASE FINISH THIS
               </p>
+              <p>Want to see your Google Calendar events here as well? Follow these steps:
+                1. Open your Google Calendar app.  
+                2. Make ONE of the calendars public. 
+                3. Find your Google Calendar ID using <a href="https://docs.simplecalendar.io/find-google-calendar-id/">this link.</a>
+                Paste it into the text box below. 
+              </p>
+              <form>
+                <input type="text" id="calendar-id" onSubmit={this.setCalendarId}/>
+              </form> 
              <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} />
           
              <div className="sidebar" id="sidebar">
                    <Colorlist colorTagsList = {this.state.colorTagsList} focusNum = {this.state.focusNum} changeColor={this.changeColor} />
              </div>
-   
              <Colorprompt colorTagsList = {this.state.colorTagsList} updateColorTags = {this.updateColorTags}/>
              <div className="marker start-hour"><input value={this.state.dayDuration[0] / 2 == 0 ? "" : this.state.dayDuration[0] / 2} onChange={(e) => this.updateStartHour(e)} /><div>AM</div></div>
              <div id="grid" className="grid" onClick={this.clearEmptySubtasks}>{taskList}</div>
              <div className="marker end-hour"><input value={((this.state.dayDuration[1] - 24) / 2  == 0) ? "" : ((this.state.dayDuration[1] - 24) / 2)} onChange={(e) => this.updateEndHour(e)} /><div>PM</div></div>
           </div>
        );
-      }
+    }
   }
 
   export default Grid; 
