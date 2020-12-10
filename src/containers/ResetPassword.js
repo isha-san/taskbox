@@ -1,10 +1,11 @@
 import NavBar from '../components/NavBar.js';
+import {useState} from 'react';
 
 function ResetPassword() {
 	const [email, setEmail] = useState(''); 
 	const sendEmail = () => {
 
-		//NOT 10000% SURE IF I DID THIS CORRECTLY; YOU MIGHT WANT TO DEBUG
+		//Store email user enters
 		let input; 
 		window.addEventListener('DOMContentLoaded', function() {
 			input = document.getElementById('email'); 
@@ -15,7 +16,7 @@ function ResetPassword() {
 			body: {'email' : email}
 		}
 		fetch('/resetPassword')
-			.then(response => response.json());
+			.then(response => response.json())
 	}
 return (
 	<div>
