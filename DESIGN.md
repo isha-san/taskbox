@@ -1,3 +1,9 @@
+# Disclaimer
+
+Running behind a few days (esp. w/ bug fixes & getting ALL frontend hooked up with backend) because the Frontend developer lives in Ohio, where it was storming the past weekend, and the power went out. They were unable to upload the key starter code in time. Contacted TFs and Course heads about this issue.
+
+Git was also not working for the frontend developer. Tried many fixes, but couldn't pull or push code. In the end, the other coders had to copy-and-paste the code from Codepen/Code Sandbox format to the folder, and that copy-and-pasting could get very tricky.
+
 # Technologies used
 
 We chose to use React, a Javascript/client-side framework, and Flask, a Python/server-side framework. 
@@ -30,9 +36,33 @@ The password reset feature is still a work in progress, so it is commented out a
 
 # Task management
 
-FRONTEND: SHAY
+FRONTEND:
 
-Backend:
+In React. Uses Props + States to have real-time saving & rendering.
+
+Here's the codepen with all of the features: https://codepen.io/shayli/pen/oNzjJjP?editors=0111
+Here's the code sandbox with more styling: https://codesandbox.io/s/login-iff0l?file=/src/App.js
+
+The features inside of this project are:
+  - Tasks that you can edit as inputs
+
+PLUS a css file with many lines of styling.
+PLUS styling for each of the signup and login pages, with material-ui.
+
+The features not inside of this project but implemented in the codepen are: 
+  - checkbox
+  - a list of subtasks
+  - a WORKING action menu
+  - the ability to change each task based on the color
+  - the ability to edit the name of the color tag
+
+(aka the above are the features that weren't configured with the backend in time, but exist as frontend components).
+
+The styling not inside of this project, but implemented in the Code Sandbox are:
+  - navbar
+
+BACKEND:
+
 When users enter or change their tasks, the React application sends more POST requests to the backend, specifically to the routes 'updateTask', 'deleteTask', and 'tasks'. These routes perform the corresponding CRUD operations on the tasks table in the database. The 'tasks' route is used to create new tasks and also accepts GET requests, so it is used to retrieve existing task information to display to the user when they open the schedule page. 
 
 # Integration with Google Calendar API
