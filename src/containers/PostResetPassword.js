@@ -5,6 +5,8 @@ import {useState} from 'react';
 function ResetPassword() {
 	const [email, password, setPassword, setEmail] = useState(''); 
 	const newPassword = () => {
+	
+	//store users email and new password
 
         let input; 
         let inputpassword;
