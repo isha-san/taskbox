@@ -319,7 +319,7 @@ class Grid extends React.Component {
          <div className="app">
               <button onClick={this.getEvents}>Add events from Google Calendar</button> 
               <p>Greyed out areas represent GCal events.</p>
-             <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} />
+             <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} shiftBackward={this.shiftBackwards} />
           
              <Colorprompt colorTagsList = {this.state.colorTagsList} updateColorTags = {this.updateColorTags}/>
              <div className="marker start-hour"><input value={this.state.dayDuration[0] / 2 == 0 ? "" : this.state.dayDuration[0] / 2} onChange={(e) => this.updateStartHour(e)} /><div>{this.state.dayDuration[0] === 12 ? "PM" : "AM"}</div></div>
