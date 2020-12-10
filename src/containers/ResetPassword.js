@@ -1,3 +1,4 @@
+/*
 import NavBar from '../components/NavBar.js';
 import {useState} from 'react';
 
@@ -32,3 +33,5 @@ return (
     );
 }
 export default ResetPassword; 
+*/
+
