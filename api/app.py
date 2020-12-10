@@ -122,8 +122,10 @@ def logout():
     print("logged out successfully")
     return {'isAuthenticated': False, "caption": "Logged out successfully"}
 
+
 @app.route('/tasks', methods = ["GET", "POST"])
 def tasks():
+    # Populating the page with existing tasks
     if (request.method == "GET"):
         with sqlite3.connect("timebox.db") as db:
             rows = db.execute("SELECT * FROM tasks WHERE user_id = ? AND date = ?;", [session["user_id"], date.today()])
@@ -139,8 +141,8 @@ def tasks():
                 d[str(i)]['color'] = rows[i][3]
                 d[str(i)]['time'] = rows[i][5]
                 d[str(i)]['checked'] = rows[i][6]
-            
             return d
+    # Creating a new task
     elif (request.method == "POST"):
         try: 
             d = str(request.data)
@@ -149,7 +151,7 @@ def tasks():
         except RuntimeError:
             return {"caption" : "Internal error"}
         with sqlite3.connect("timebox.db") as db:
-            
+            # inserting a new task into the databaes with form data
             db.execute("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, title TEXT, color TEXT, date DATE NOT NULL, time INTEGER NOT NULL, checked BOOLEAN);")
             db.execute("INSERT INTO tasks (user_id, title, color, date, time, checked) VALUES (?, ?, ?, ?, ?, ?);", [session['user_id'], data['text'], data['color'], date.today(), data['time'], data['checked']])
             rows = db.execute("SELECT * from tasks WHERE user_id = ? AND date = ? AND time = ?;", [session["user_id"], date.today(), data["time"]])
@@ -160,7 +162,7 @@ def tasks():
                 
                 print("TASK STORED SUCCESSFULLY")
             return {"caption": "task stored successfully"}
-
+# deleting a task
 @app.route('/deleteTask', methods = ["POST"])
 def deleteTask():
     if (request.method == "POST"):
@@ -171,6 +173,7 @@ def deleteTask():
                 data = json.loads(d[2 : len(d) - 1])
             except RuntimeError:
                 return {"caption" : "Internal error"}
+            # deleting a task from the database
             db.execute("DELETE FROM tasks WHERE user_id = ? AND date = ? AND time = ?", [session["user_id"], date.today(), data['time']])
             rows = db.execute("SELECT * from tasks WHERE user_id = ? AND date = ? AND time = ?;", [session["user_id"], date.today(), data["time"]])
             rows = rows.fetchall()
@@ -178,6 +181,7 @@ def deleteTask():
                 print("task deleted")
             return {"caption": "task deleted successfully"}
 
+# editing a task
 @app.route('/updateTask', methods = ["POST"])
 def updateTask():
     if (request.method == "POST"):
@@ -188,9 +192,11 @@ def updateTask():
                 data = json.loads(d[2 : len(d) - 1])
             except RuntimeError:
                 return {"caption" : "Internal error"}
+            # editing an existing task in the database
             db.execute("UPDATE tasks SET color = ?, title = ?, checked = ? WHERE user_id = ? AND date = ? AND time = ? ", [data['color'], data['text'], data['checked'], session["user_id"], date.today(), data['time']])
             return {"caption": "task updated successfully"}
 
+# moving tasks forward by an hour
 @app.route('/shiftTasks')
 def shiftTasks():
     with sqlite3.connect("timebox.db") as db:
