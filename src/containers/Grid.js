@@ -79,7 +79,8 @@ class Grid extends React.Component {
     getEvents() {
       //set the APi as enabled in state
       this.state.calendarApi = true; 
-      //load GAPI
+
+      //initializes the Google API client
       gapi.load('client:auth2', () => {
         gapi.client.init({
           apiKey: API_KEY,
@@ -88,17 +89,17 @@ class Grid extends React.Component {
           scope: SCOPES
         })
         gapi.client.load('calendar', 'v3');
-        //Display a pop-up for the user to sign in with Google
+        
+        //Displays a pop-up for the user to sign in with Google
         gapi.auth2.getAuthInstance().signIn()
           .then(() => {
-              // get events
-            console.log("i'm the getting the events for you, be back in a sec");
+            
             var minHour = new Date(); 
-            //is this part even necessary? 
             minHour.setHours(this.state.dayDuration[0]/2);
             var maxHour = new Date(); 
-            //is this part even necessary?
             maxHour.setHours(this.state.dayDuration[1]/2);
+
+            //gets the calendar events with the API
             gapi.client.calendar.events.list({
               'calendarId': 'primary', 
               'timeMin': minHour.toISOString(), 
@@ -130,7 +131,6 @@ class Grid extends React.Component {
         for (let i = 0; i < 48; i++) {
           for (const key in v){
             const value = v[key];
-            //console.log(value);
             if (key != '-1' && value.time === i) {
               console.log("value reached");
               this.state.taskList[i] = {'checked': value.checked, 'color': value.color, 'text': value.title};
@@ -329,14 +329,14 @@ class Grid extends React.Component {
           </>);
             
        return(
+         /*<div className="sidebar" id="sidebar">
+                   <Colorlist colorTagsList = {this.state.colorTagsList} focusNum = {this.state.focusNum} changeColor={this.changeColor} />
+             </div>*/
          <div className="app">
               <button onClick={this.getEvents}>Add events from Google Calendar</button> 
               <p>Greyed out areas represent GCal events.</p>
              <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} />
           
-             <div className="sidebar" id="sidebar">
-                   <Colorlist colorTagsList = {this.state.colorTagsList} focusNum = {this.state.focusNum} changeColor={this.changeColor} />
-             </div>
              <Colorprompt colorTagsList = {this.state.colorTagsList} updateColorTags = {this.updateColorTags}/>
              <div className="marker start-hour"><input value={this.state.dayDuration[0] / 2 == 0 ? "" : this.state.dayDuration[0] / 2} onChange={(e) => this.updateStartHour(e)} /><div>AM</div></div>
              <div id="grid" className="grid" onClick={this.clearEmptySubtasks}>{taskList}</div>

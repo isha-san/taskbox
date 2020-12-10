@@ -38,7 +38,7 @@ const DayView = () => {
 
     //ReactDOM.render(<DayView />, document.getElementById("root"));
     
-    if (auth === false) {
+    if (auth == false) {
         return <Redirect exact to="/login"/>;
     }
     return (

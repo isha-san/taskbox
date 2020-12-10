@@ -4,6 +4,8 @@ import { Redirect } from 'react-router-dom';
 
 function AuthHome() {
     const [auth, setAuth] = useState(true);
+    //check if user is authenticated by sending a request to the server
+    //(had to put it in container files because had trouble exporting it to a different file)
     useEffect(() => {
         let mounted = true;
         if (mounted) {
@@ -16,6 +18,7 @@ function AuthHome() {
             mounted = false;
         };
     });
+    //if the user is not logged in, they see the login page
     if (auth === false) {
         return <Redirect exact to="/login"/>;
     }

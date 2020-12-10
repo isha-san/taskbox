@@ -17,20 +17,18 @@ function NavBar() {
         fetch('/authentication')
         .then(response => response.json())
         .then(data => setAuth(data.isAuthenticated));
-        console.log(auth);
     });
-    
+    //Logs the user out - makes a call to the backend
     function logout() {
         fetch('/logout')
         .then(response => response.json())
         .then(data => setAuth(data.isAuthenticated));
-        console.log(auth);
     }
+
     //The links that should be displayed if the user is authenticated
     const authlinks = 
     <Fragment>
         <Toolbar className="align-items-right">
-            <NavLink exact to="/profile">Profile</NavLink>
             <NavLink exact to="/authhome">Home</NavLink>
             <NavLink exact to="/dayview">Schedule</NavLink>
             <button id="logout-btn" onClick={logout}>Log Out</button>
