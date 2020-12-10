@@ -1,3 +1,4 @@
+// Codepen that I reference often: https://codepen.io/shayli/pen/oNzjJjP?editors=0111
 import Chunk from './Chunk.js';
 import React, {Component, useEffect} from 'react';
 import Actionmenu from './ActionMenu.js';
@@ -61,6 +62,13 @@ class Grid extends React.Component {
       this.getEvents = this.getEvents.bind(this);
       this.updateGrid = this.updateGrid.bind(this);
   
+          //taskList is a list of objects; and each object is a task.
+          //focusNum is a list of two items: the second item is the "id" of the input you just clicked; and the first item is the "id" of the input that you clicked BEFORE your current click.
+            // aka, focusNum[1] = num-id of the input you are focusing on currently; and focusNum[0] = num-id of the input you prev focused on.
+            // the num-id is an arribute of each object in the taskList, called "time". The half-hour block on-screen that represents the 12:00am - 12:30am timeslot, for example, is 0.
+          //dayDuration is a list of two items: the first is the "time" of when your day starts, and the second is the "time" of when it ends
+          //colorTagsList is a list of objects; and each object represents a tag (with a hexcode color & a name)
+          
       this.state = {
         taskList: props.initList,
         calendarApi: false, 
@@ -177,6 +185,7 @@ class Grid extends React.Component {
       this.updateGrid(); 
     }
     
+      //edit Subtask. Not in this implementation, but in the Codepen.
     onSubTextChange(event, time, subIndex) {
       let taskList = this.state.taskList;
       taskList[time].subtasks[subIndex].title = event;
@@ -186,18 +195,22 @@ class Grid extends React.Component {
       this.setState({taskList:taskList});
     }
     
+      // delete Subtask. Not in this implementation, but in the Codepen.
     onSubDelete(time, subIndex) {
       let taskList = this.state.taskList;
       taskList[time].subtasks.splice(subIndex, 1);
       this.setState({taskList:taskList});
     }
     
+      // checkoff Subtask. Not in this implementation, but in the Codepen.
     onSubCheckOff(time, subIndex) {
       let taskList = this.state.taskList;
       taskList[time].subtasks[subIndex].checked = !taskList[time].subtasks[subIndex].checked;
       this.setState({taskList:taskList})
     }
-    
+      
+      // if you backspace all the info out of a subtask, it auto-deletes
+      
     clearEmptySubtasks() {
       let taskList = this.state.taskList;
       let taskListLength = taskList.length;
@@ -213,12 +226,18 @@ class Grid extends React.Component {
       this.setState({taskList:taskList});
     }
       
+      // push on the focusNum array the current block you are focusing on
+      
     onFocusChangeState(ind) {
       let focusNum = this.state.focusNum;
       focusNum.shift();
       focusNum.push(ind);
       this.setState({focusNum:focusNum});
     }
+      
+      // Different Action menu buttons (may not work, but work in Codepen)
+      
+      // Shift all tasks forward
     
    shiftForward = () => {
     let taskList = this.state.taskList;
@@ -227,6 +246,8 @@ class Grid extends React.Component {
     taskList[0] = lastItem;
     this.setState({taskList:taskList});
   }
+   
+      // Shift all tasks backward
     shiftBackwards = () => {
     let taskList = this.state.taskList;
     let firstItem = taskList[0];
@@ -234,6 +255,7 @@ class Grid extends React.Component {
     taskList[-1] = firstItem;
     this.setState({taskList:taskList});
   }
+    // Carryover one task
     
     carryOver = () => {
     let taskList = this.state.taskList;
@@ -257,6 +279,8 @@ class Grid extends React.Component {
     }
     this.setState({taskList:taskList});
    }
+    
+    // change the color of the task. Not in this implementation, but in the Codepen.
       
     changeColor(focusIndex) {
       let taskList = this.state.taskList;
@@ -273,16 +297,24 @@ class Grid extends React.Component {
       }*/
       
     }
+
+      //check off task. Not in this implementation, but in the Codepen.
     
     checkTask(timeIndex) {
       let taskList = this.state.taskList;
       taskList[timeIndex].checked = !taskList[timeIndex].checked;
       this.setState({taskList:taskList});
     }
-    
+
+      //unused, for future
+
     updateColorTags(lis) {
      this.setState({colorTagsList:lis});
     }
+
+      // updateEndHour and updateStartHour are functions that help you focus in on part of the grid.
+      // These functions are connected to inputs.
+      // Input 3AM at the start, and 9PM at the end, for example... then the grid will only show blocks between those two times.
     
     updateStartHour(e) {
       let dayDuration = this.state.dayDuration;
@@ -304,8 +336,10 @@ class Grid extends React.Component {
         }
     }
     render() {   
-      this.updateGrid();      
+      this.updateGrid(); 
+          //mapping the array of objects in taskList to HTML Objects, calling the React component Chunk (in another file, Chunk.js) and passing in many props.
        const taskList = this.state.taskList.map((task, index) => 
+                                                // this is the part where we use dayDuration to figure out if Chunk should be shown or not.
         <>{(index) % 2 == 0 && <div className="grid--label" style={{display: ((index) >= this.state.dayDuration[0] && (index) < this.state.dayDuration[1]) ? "block" : "none"}}><span>{parseInt(index)/2 % 12 == 0 ? 12 : parseInt(index)/2 % 12}{((index) <= 22) ? "am" : "pm"}</span></div>}
           <Chunk
             GCal={this.state.eventTimes} time={index} text={task.text} checked={task.checked} color={task.color} subtasks={task.subtasks} dayDuration={this.state.dayDuration} focusNum={this.state.focusNum} colorTagsList = {this.state.colorTagsList}
@@ -317,13 +351,17 @@ class Grid extends React.Component {
                    <Colorlist colorTagsList = {this.state.colorTagsList} focusNum = {this.state.focusNum} changeColor={this.changeColor} />
              </div>*/
          <div className="app">
+             // add Events from Google Calendar button
               <button onClick={this.getEvents}>Add events from Google Calendar</button> 
-              <p>Greyed out areas represent GCal events.</p>
+              <p>Greyed out areas represent GCal events.</p>\
+             // calls Actionmenu component from Actionmenu.js
              <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} shiftBackward={this.shiftBackwards} />
-          
+          //calls Colorprompt component from Colorprompt.js
              <Colorprompt colorTagsList = {this.state.colorTagsList} updateColorTags = {this.updateColorTags}/>
+             // the input where you put what time you want to start at, when focusing in. Restricted to AM times, + 12PM. Might be a little wonky in this implement, check the Codepen.
              <div className="marker start-hour"><input value={this.state.dayDuration[0] / 2 == 0 ? "" : this.state.dayDuration[0] / 2} onChange={(e) => this.updateStartHour(e)} /><div>{this.state.dayDuration[0] === 12 ? "PM" : "AM"}</div></div>
              <div id="grid" className="grid" onClick={this.clearEmptySubtasks}>{taskList}</div>
+            // the input where you put what time you want to end at, when focusing in. Restricted to PM times, + 12AM. Might be a little wonky in this implement, check the Codepen for the better version.
              <div className="marker end-hour"><input value={((this.state.dayDuration[1] - 24) / 2  == 0) ? "" : ((this.state.dayDuration[1] - 24) / 2)} onChange={(e) => this.updateEndHour(e)} /><div>{this.state.dayDuration[1] === 12 ? "AM" : "PM"}</div></div>
           </div>
        );
