@@ -212,17 +212,7 @@ class Grid extends React.Component {
       }*/
       this.setState({taskList:taskList});
     }
-    
-    shiftForward() {
-      let taskList = this.state.taskList;
-      taskList.unshift({checked: false, color: 0, title:"", subtasks: [{checked:false, title:""}]});
-      //TODO: take care of end stuff
-      taskList.splice(48, 1);
-      this.setState({taskList:taskList});
-      fetch("/shiftTasks");
-      this.updateGrid(); 
-    }
-    
+      
     onFocusChangeState(ind) {
       let focusNum = this.state.focusNum;
       focusNum.shift();
@@ -230,46 +220,44 @@ class Grid extends React.Component {
       this.setState({focusNum:focusNum});
     }
     
-    carryOver() {
-      let taskList = this.state.taskList;
-      let toBePushed = this.state.focusNum;
-      
-      console.log(taskList[toBePushed].text);
-      
-      if (taskList[toBePushed].text == ""){
-        return;
-      }
-      
-      if (taskList[toBePushed + 1].text == ""){
-        taskList[toBePushed + 1].text = taskList[toBePushed].text;
-      }
-      else {
-        taskList[toBePushed + 1].subtasks.unshift({checked:false, title:taskList[toBePushed].text});
-      }
-      
-      //document.getElementsByClassName("task--title")[this.state.focus + 1].focus();
-      //TODO take care of subtasks
-      
-      taskList[toBePushed].text = "";
-      
-      this.setState({focusNum:this.state.focusNum+1});
-      this.setState({taskList:taskList});
-      
-      // the subtasks should remain open
-      
-      /*
-      if (taskList[toBePushed].subtasks.length > 1){
-        taskList[toBePushed - 1].subtasks.concat(taskList[toBePushed].subtasks);
-      }
-      */
-    }
-     
-    /*for (var i = 0; i < colorSquareObjs.length; i++)
-    {
-      colorSquareObjs[i].addEventListener("click", function() {
-        alert("hello");
-    });*/
+   shiftForward = () => {
+    let taskList = this.state.taskList;
+    let lastItem = taskList[47];
+    taskList.unshift({checked: false, color: 0, text:"", subtasks: [{checked:false, title:""}]});
+    taskList[0] = lastItem;
+    this.setState({taskList:taskList});
+  }
+    shiftBackwards = () => {
+    let taskList = this.state.taskList;
+    let firstItem = taskList[0];
+    taskList.shift();
+    taskList[-1] = firstItem;
+    this.setState({taskList:taskList});
+  }
     
+    carryOver = () => {
+    let taskList = this.state.taskList;
+    let f = this.state.focusNum[1];
+    if(f === 47){
+      if((taskList[0].text !== "") && (taskList[47].text !== "")){
+        taskList[0].text = taskList[0].text + "," + taskList[47].text;
+        taskList[47].text = "";
+      } else if(taskList[47].text !== ""){
+        taskList[0].text = taskList[47].text;
+        taskList[47].text = "";
+      }
+    } else {
+      if((taskList[f + 1].text !== "") && (taskList[f].text!== "")){
+        taskList[f + 1].text = taskList[f + 1].text + ", " + taskList[f].text;
+        taskList[f].text = "";
+      } else if(taskList[f].text !== ""){
+        taskList[f + 1].text = taskList[f].text;
+        taskList[f].text = "";
+      }
+    }
+    this.setState({taskList:taskList});
+   }
+      
     changeColor(focusIndex) {
       let taskList = this.state.taskList;
       taskList[this.state.focusNum[1]].color = focusIndex;
@@ -302,10 +290,6 @@ class Grid extends React.Component {
       if (1 <= text && text <= 12 || text == "")
         {
           dayDuration[0] = text * 2;
-          if (text == 12)
-           {
-              dayDuration[0] = 0;
-           }
           this.setState({dayDuration: dayDuration})
         }
     }
@@ -313,7 +297,7 @@ class Grid extends React.Component {
     updateEndHour(e) {
       let dayDuration = this.state.dayDuration;
       var text = e.target.value;
-      if (1 <= text && text <= 11 || text == "")
+      if (1 <= text && text <= 12 || text == "")
         {
           dayDuration[1] = text * 2 + 24;
           this.setState({dayDuration: dayDuration});
@@ -338,9 +322,9 @@ class Grid extends React.Component {
              <Actionmenu shiftForward={this.shiftForward} carryOver={this.carryOver} />
           
              <Colorprompt colorTagsList = {this.state.colorTagsList} updateColorTags = {this.updateColorTags}/>
-             <div className="marker start-hour"><input value={this.state.dayDuration[0] / 2 == 0 ? "" : this.state.dayDuration[0] / 2} onChange={(e) => this.updateStartHour(e)} /><div>AM</div></div>
+             <div className="marker start-hour"><input value={this.state.dayDuration[0] / 2 == 0 ? "" : this.state.dayDuration[0] / 2} onChange={(e) => this.updateStartHour(e)} /><div>{this.state.dayDuration[0] === 12 ? "PM" : "AM"}</div></div>
              <div id="grid" className="grid" onClick={this.clearEmptySubtasks}>{taskList}</div>
-             <div className="marker end-hour"><input value={((this.state.dayDuration[1] - 24) / 2  == 0) ? "" : ((this.state.dayDuration[1] - 24) / 2)} onChange={(e) => this.updateEndHour(e)} /><div>PM</div></div>
+             <div className="marker end-hour"><input value={((this.state.dayDuration[1] - 24) / 2  == 0) ? "" : ((this.state.dayDuration[1] - 24) / 2)} onChange={(e) => this.updateEndHour(e)} /><div>{this.state.dayDuration[1] === 12 ? "AM" : "PM"}</div></div>
           </div>
        );
     }
