@@ -3,6 +3,7 @@ import './App.css';
 
 // Colorlist is all of the colors at the left side.
 // Actionmenu are the buttons with symbols (arrows) on the left side.
+// Both of these are possibly broken, so here's the correct implementation in Codepen: https://codepen.io/shayli/pen/oNzjJjP?editors=0111
 
 function Colorlist(props)
 {
