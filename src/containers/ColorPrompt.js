@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
 
+//Colorprompt is the modal that you can click into and edit the names of your tags.
+//Possibly broken, but here's the Codepen implementation: https://codepen.io/shayli/pen/oNzjJjP?editors=0111
+
 class Colorprompt extends React.Component {
     constructor(props)
     {
