@@ -3,10 +3,17 @@ import types
 from datetime import date
 from flask import Flask, request, session
 import json
+#from flask_mail import Message
+#from app import mail
+#from threading import Thread
+#from time import time
+#import jwt
 
 app = Flask(__name__)
 
 app.secret_key="_.xfbgY.xca.xba.x91E}.xe7.x91).xb1.x8a.xb0"
+#Commented out because mailing password reset feature is not fully functional
+#mail = Mail(app)
 
 @app.route('/')
 def default():
@@ -24,30 +31,6 @@ def authentication():
         return {'isAuthenticated' : False}  
     print("currently not logged in")
     return {'isAuthenticated' : False}
-
-# Route for password reset
-@app.route('/resetPassword')
-def resetPassword():
-    try: 
-        d = str(request.data)
-        print(d)
-        data = json.loads(d[2 : len(d) - 1])
-    except RuntimeError:
-        return { 'isAuthenticated' : False, "caption" : "Internal error"}
-    if not data["email"]:
-        print("incomplete form")
-        return {'isAuthenticated': False, "caption": "Must enter an email address"}
-    # checks to see if there is a user with the data
-    # creates a connection to database
-    users = db.execute("SELECT * FROM users WHERE email = ?", [data["email"]])
-    users = users.fetchall()
-    # if such a user exists, sets the session user id to the user's id in the database
-    if len(users) == 1:
-        return redirect ('/')#TODO: redirect to function to generate key and send email
-    # if a user does not exist, returns error message
-    else:
-        print("No user found with this email address")
-        return {'isAuthenticated' : False, "caption": "Incorrect email"}
 
 # Route for login
 @app.route('/login', methods = ["GET", "POST"])
@@ -121,6 +104,91 @@ def logout():
     session["user_id"] = -1
     print("logged out successfully")
     return {'isAuthenticated': False, "caption": "Logged out successfully"}
+
+"""
+# Commented out because feature is not fully functional
+# Route for password reset
+@app.route('/resetPassword')
+def resetPassword():
+    try: 
+        d = str(request.data)
+        print(d)
+        data = json.loads(d[2 : len(d) - 1])
+        db = sqlite3.connect("timebox.db")
+    except RuntimeError:
+        return { 'isAuthenticated' : False, "caption" : "Internal error"}
+    if not data["email"]:
+        print("incomplete form")
+        return {'isAuthenticated': False, "caption": "Must enter an email address"}
+    # checks to see if there is a user with the data
+    # creates a connection to database
+    users = db.execute("SELECT * FROM users WHERE email = ?", [data["email"]])
+    users = users.fetchall()
+    # if such a user exists, sets the session user id to the user's id in the database
+    if len(users) == 1:
+        sendPasswordReset(data)
+        flash('Check your email for instructions to reset your password')
+        return redirect ('/login')
+    # if a user does not exist, returns error message
+    else:
+        print("No user found with this email address")
+        return {'isAuthenticated' : False, "caption": "Incorrect email"}
+
+def sendPasswordReset(user):
+    token = get_reset_password_token(user["user_id"])
+    send_email('[Taskbox] Reset Your Password',
+                sender='taskbox@gmail.com',
+                recipients=[user["email"],
+                text_body=render_template('reset_password.txt', token=token),
+                html_body=render_template('reset_password.html', token=token))
+
+
+def get_reset_password_token(user_id):
+    return jwt.encode(
+        {'changePassword': user_id, 'exp': time() + 600},
+        app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+
+def verify_reset_password_token(token):
+    try:
+        id = jwt.decode(token, app.config['SECRET_KEY'],
+                        algorithms=['HS256'])['changePassword']
+    except:
+        return
+        # have to change bc not using the user model
+    return user ??????
+
+
+def send_async_email(app, msg):
+    # send the email asynchronously to avoid slowing down program
+    with app.app_context():
+        mail.send(msg)
+
+
+@app.route('/send_email')
+def send_email(subject, sender, recipients, text_body, html_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = text_body
+    msg.html = html_body
+    # should be calling (app, msg) or just msg?
+    Thread(target=send_async_email, args=(app, msg)).start()
+
+@app.route('/changePassword/<token>', methods=['GET', 'POST'])
+def changePassword(token):
+    try: 
+        d = str(request.data)
+        print(d)
+        data = json.loads(d[2 : len(d) - 1])
+        db = sqlite3.connect("timebox.db")
+    except RuntimeError:
+        return { 'isAuthenticated' : False, "caption" : "Internal error"}
+    users = db.execute("SELECT * FROM users WHERE email = ?", [data["email"]])
+    users = users.fetchall()
+    # update users table with new password
+    db.execute("UPDATE users SET password = ? WHERE email = ?", [data["password"]], [data["email"]])
+    flash('Your password has been reset.')
+    return redirect('/login')
+"""
 
 
 @app.route('/tasks', methods = ["GET", "POST"])
