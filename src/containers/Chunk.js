@@ -1,3 +1,4 @@
+//Codepen that I reference often: https://codepen.io/shayli/pen/oNzjJjP?editors=0111
 import { render } from '@testing-library/react';
 import React, {Component} from 'react';
 import './App.css';
@@ -22,6 +23,7 @@ class Chunk extends React.Component {
         isEventPresent: this.isEventPresent()
       });
     }
+    // is there a GCal event present at a given timeslot
     isEventPresent = () => {
       var GCal = this.props.GCal;
       var index = this.props.time;
@@ -32,6 +34,8 @@ class Chunk extends React.Component {
       }
       return false;
     }
+    
+    // all of these function calls are basically just: I pass in a function from Grid as a prop, and then I call those functions in Grid from Chunk to update the state in Grid.
 
     onTextChangeHelper(e) {
       this.props.onTextChange(e.target.value, this.props.time);
@@ -96,6 +100,8 @@ class Chunk extends React.Component {
           sameRowFocus = true;
         }
       
+        // Generate subtasks. Feature present in Codepen, but not in this implementation.
+        
       //let subtaskList; 
       /*if (this.props.subtasks) {
         subtaskList = this.props.subtasks.map((task, index) => 
