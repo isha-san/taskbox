@@ -1,6 +1,9 @@
 import React, {Fragment} from 'react';
 import './App.css';
 
+// Colorlist is all of the colors at the left side.
+// Actionmenu are the buttons with symbols (arrows) on the left side.
+
 function Colorlist(props)
 {
   const openColorPrompt = () =>
