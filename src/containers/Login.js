@@ -1,6 +1,12 @@
 import {useState, useEffect} from 'react';
 import NavBar from '../components/NavBar.js';  
 import { Redirect } from 'react-router-dom';
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 
 
 function Login() {
@@ -33,32 +39,58 @@ function Login() {
     }
     return (
         <div>
-            <NavBar/>
-            <p id="login-summary"></p>
-            <form onSubmit={e => onSubmit(e)} >
-                <label>Email</label>
-                <input 
-                    className="form-control" 
-                    type="text" 
-                    name="email"
-                    value={email}
-                    onChange={e => onChange(e)}
-                    required
+      <NavBar />
+      <Grid
+        container
+        className="top-margin"
+        justify="center"
+        alignItems="center"
+      >
+        <Grid item xs={6}>
+          <Paper className="padding">
+            <Typography variant="h3">Login</Typography>
+            <form onSubmit={e => onSubmit(e)}>
+              <Box m={3}>
+                <TextField
+                  className="form-control"
+                  type="text"
+                  name="email"
+                  value={email}
+                  onChange={e => onChange(e)}
+                  required
+                  variant="outlined"
+                  label="Username"
+                  fullWidth
+                ></TextField>
+              </Box>
+              <Box m={3}>
+                <TextField
+                  className="form-control"
+                  type="password"
+                  name="password"
+                  value={password}
+                  onChange={e => onChange(e)}
+                  variant="outlined"
+                  label="Password"
+                  required
+                  fullWidth
+                ></TextField>
+              </Box>
+              <Grid container justify="center">
+                <Button
+                  type="submit"
+                  onClick={handleClick}
+                  variant="contained"
+                  color="primary"
                 >
-                </input>
-                <label>Password</label>
-                <input
-                    className="form-control" 
-                    type="password" 
-                    name="password"
-                    value={password}
-                    onChange={e => onChange(e)} 
-                    required
-                >
-                </input>
-                <button type="submit" onClick={handleClick}>Submit</button>
+                  Submit
+                </Button>
+              </Grid>
             </form>
-        </div>
+          </Paper>
+        </Grid>
+      </Grid>
+    </div>
         
     );
     

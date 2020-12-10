@@ -73,9 +73,6 @@ class Grid extends React.Component {
     //how to get the grid to update without user actions? / when the grid displays for the first time? 
     componentDidMount() {
       this.updateGrid(); 
-      //if (this.state.calendarId != '') {
-        this.getEvents(); 
-      //}
     }
 
     //Uses GCal API to pull calendar events into grid

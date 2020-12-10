@@ -1,5 +1,6 @@
 import { Fragment, useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Button, Toolbar } from "@material-ui/core";
 //import * from '@material-ui/core';
 
 function NavBar() {
@@ -28,18 +29,22 @@ function NavBar() {
     //The links that should be displayed if the user is authenticated
     const authlinks = 
     <Fragment>
-        <NavLink exact to="/profile">Profile</NavLink>
-        <NavLink exact to="/authhome">Home</NavLink>
-        <NavLink exact to="/dayview">Schedule</NavLink>
-        <button id="logout-btn" onClick={logout}>Log Out</button>
+        <Toolbar className="align-items-right">
+            <NavLink exact to="/profile">Profile</NavLink>
+            <NavLink exact to="/authhome">Home</NavLink>
+            <NavLink exact to="/dayview">Schedule</NavLink>
+            <button id="logout-btn" onClick={logout}>Log Out</button>
+        </Toolbar>
     </Fragment>
 
     //The links that should be displayed if the user is unauthenticated
     const unauthlinks = 
     <Fragment>
-        <NavLink exact to="/signup">Sign Up</NavLink>
-        <NavLink exact to="/login">Log In</NavLink>
-        <NavLink exact to="/landing">Home</NavLink>
+        <Toolbar className="align-items-right">
+            <NavLink exact to="/signup">Sign Up</NavLink>
+            <NavLink exact to="/login">Log In</NavLink>
+            <NavLink exact to="/landing">Home</NavLink>
+        </Toolbar>
     </Fragment>
     return (
         <nav>

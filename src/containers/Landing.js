@@ -10,15 +10,18 @@ function Landing() {
         .then(data => setAuth(data.isAuthenticated));
         console.log(auth);
     });
-    if (auth === false) {
-        return <Redirect exact to="/login"/>
+    if (auth == true) {
+        return <Redirect exact to="/authhome"/>
     }
     return (
         <div>
             <NavBar></NavBar>
-            <h1>Welcome to Timebox,</h1>
-            <h6>the web application that helps you manage your time.</h6>
-            <p>Developed by Isha Sangani, Shay Li, and Clare Morris for CS50 (but really, for busy college students).</p>
+            <div className="top-margin fake-grid">
+                <div>Welcome to Timebox!</div>
+                <div>
+                    Log in to start using Timebox to get things done efficiently.
+                </div>
+            </div>
         </div>
     );
 }

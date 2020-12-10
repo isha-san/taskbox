@@ -22,7 +22,10 @@ function AuthHome() {
     return (
         <div>
             <NavBar></NavBar>
-            <h1>Authenticated Home</h1>
+            <h1>Welcome to timebox!</h1>
+            <p>The app that lets you schedule your tasks. Developed by Isha Sangani, 
+                Clare Morris, and Shay Li for CS50 (and beyond).
+            </p>
         </div>
     );
 }
